@@ -370,10 +370,14 @@ class RobotControlUI(QMainWindow):
             self.statusBar().showMessage("切換到自動模式")
             # 啟用塗膠閥類型選擇
             self.valve_type_combo.setEnabled(True)
-            self.valve_type_combo.setCurrentIndex(0)  # 重置為第一個選項
-            # 重設路徑選擇
-            if self.path_combo.count() > 0:
-                self.path_combo.setCurrentIndex(0)  # 預設選擇第一個路徑
+            # 強制觸發信號以啟用路徑選擇（即使已經在索引0）
+            current_index = self.valve_type_combo.currentIndex()
+            if current_index >= 0:
+                # 如果已經有選項，手動調用 on_valve_type_changed() 來啟用路徑
+                self.on_valve_type_changed()
+            else:
+                # 如果沒有選項，設置為第一個
+                self.valve_type_combo.setCurrentIndex(0)
             # 顯示自動運行按鈕
             self.auto_run_button.setVisible(True)
             self.auto_run_button.setEnabled(False)  # 先禁用，直到選擇了路徑
