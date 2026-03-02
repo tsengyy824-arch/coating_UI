@@ -182,29 +182,69 @@ class RobotControlUI(QMainWindow):
         self.connect_button = QPushButton("連接")
         self.connect_button.clicked.connect(self.connect_modbus)
         self.connect_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
-            color: white; border: 2px solid #006699; border-radius: 8px;
-            padding: 12px 20px; min-height: 40px; min-width: 80px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
+                color: white; border: 2px solid #006699; border-radius: 8px;
+                padding: 12px 20px; min-height: 40px; min-width: 80px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00BBEE, stop:1 #0099CC);
+                border: 3px solid #0099CC;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #006699, stop:1 #004477);
+                padding: 14px 18px 10px 22px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         self.disconnect_button = QPushButton("斷開")
         self.disconnect_button.clicked.connect(self.disconnect_modbus)
         self.disconnect_button.setEnabled(False)
         self.disconnect_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC3333, stop:1 #AA2222);
-            color: white; border: 2px solid #992222; border-radius: 8px;
-            padding: 12px 20px; min-height: 40px; min-width: 80px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC3333, stop:1 #AA2222);
+                color: white; border: 2px solid #992222; border-radius: 8px;
+                padding: 12px 20px; min-height: 40px; min-width: 80px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #EE5555, stop:1 #CC3333);
+                border: 3px solid #CC3333;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #992222, stop:1 #771111);
+                padding: 14px 18px 10px 22px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         tutorial_button = QPushButton("使用步驟")
         tutorial_button.clicked.connect(self.show_tutorial)
         tutorial_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF9900, stop:1 #DD7700);
-            color: white; border: 2px solid #CC6600; border-radius: 8px;
-            padding: 12px 20px; min-height: 40px; min-width: 100px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF9900, stop:1 #DD7700);
+                color: white; border: 2px solid #CC6600; border-radius: 8px;
+                padding: 12px 20px; min-height: 40px; min-width: 100px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFBB22, stop:1 #FF9900);
+                border: 3px solid #FF9900;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC6600, stop:1 #AA5500);
+                padding: 14px 18px 10px 22px;
+            }
         """)
         
         layout.addWidget(status_label)
@@ -229,20 +269,50 @@ class RobotControlUI(QMainWindow):
         self.start_button.setEnabled(False)
         self.start_button.clicked.connect(self.start_robot)
         self.start_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00CC66, stop:1 #00AA55);
-            color: white; border: 3px solid #008844; border-radius: 10px;
-            padding: 15px 25px; min-height: 50px; min-width: 130px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00CC66, stop:1 #00AA55);
+                color: white; border: 3px solid #008844; border-radius: 10px;
+                padding: 15px 25px; min-height: 50px; min-width: 130px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00EE88, stop:1 #00CC66);
+                border: 4px solid #00AA55;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #008844, stop:1 #006633);
+                padding: 17px 23px 13px 27px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 3px solid #BBBBBB;
+            }
         """)
         
         self.stop_button = QPushButton("停止 (STOP)")
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self.stop_robot)
         self.stop_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF4444, stop:1 #DD2222);
-            color: white; border: 3px solid #BB1111; border-radius: 10px;
-            padding: 15px 25px; min-height: 50px; min-width: 130px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF4444, stop:1 #DD2222);
+                color: white; border: 3px solid #BB1111; border-radius: 10px;
+                padding: 15px 25px; min-height: 50px; min-width: 130px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF6666, stop:1 #FF4444);
+                border: 4px solid #DD2222;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #BB1111, stop:1 #990000);
+                padding: 17px 23px 13px 27px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 3px solid #BBBBBB;
+            }
         """)
         
         layout.addWidget(self.start_button)
@@ -311,10 +381,25 @@ class RobotControlUI(QMainWindow):
         self.auto_run_button.setEnabled(False)
         self.auto_run_button.clicked.connect(self.start_auto_glue)
         self.auto_run_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
-            color: white; border: 2px solid #006699; border-radius: 8px;
-            padding: 12px 20px; min-height: 40px; min-width: 180px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
+                color: white; border: 2px solid #006699; border-radius: 8px;
+                padding: 12px 20px; min-height: 40px; min-width: 180px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00BBEE, stop:1 #0099CC);
+                border: 3px solid #0099CC;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #006699, stop:1 #004477);
+                padding: 14px 18px 10px 22px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         self.auto_run_button.setVisible(False)  # 初始隱藏
         
@@ -347,20 +432,50 @@ class RobotControlUI(QMainWindow):
         self.valve_on_button.setEnabled(False)
         self.valve_on_button.clicked.connect(self.valve_on)
         self.valve_on_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFE680, stop:1 #FFD966);
-            color: #003D79; border: 2px solid #CCAA00; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFE680, stop:1 #FFD966);
+                color: #003D79; border: 2px solid #CCAA00; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFFF99, stop:1 #FFE680);
+                border: 3px solid #DDBB00;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CCAA00, stop:1 #AA8800);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 2px solid #BBBBBB;
+            }
         """)
         
         self.valve_off_button = QPushButton("關閉 (OFF)")
         self.valve_off_button.setEnabled(False)
         self.valve_off_button.clicked.connect(self.valve_off)
         self.valve_off_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
-            color: #333333; border: 2px solid #999999; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
+                color: #333333; border: 2px solid #999999; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #EEEEEE, stop:1 #CCCCCC);
+                border: 3px solid #AAAAAA;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #AAAAAA, stop:1 #888888);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #EEEEEE;
+                color: #AAAAAA;
+                border: 2px solid #CCCCCC;
+            }
         """)
         
         self.valve_status_label = QLabel("狀態: 關閉")
@@ -383,20 +498,50 @@ class RobotControlUI(QMainWindow):
         self.cylinder_1_extend_button.setEnabled(False)
         self.cylinder_1_extend_button.clicked.connect(self.cylinder_1_extend)
         self.cylinder_1_extend_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
-            color: white; border: 2px solid #338855; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
+                color: white; border: 2px solid #338855; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #88EEBB, stop:1 #66CC99);
+                border: 3px solid #44AA77;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #338855, stop:1 #226644);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         self.cylinder_1_retract_button = QPushButton("收回")
         self.cylinder_1_retract_button.setEnabled(False)
         self.cylinder_1_retract_button.clicked.connect(self.cylinder_1_retract)
         self.cylinder_1_retract_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
-            color: white; border: 2px solid #CC4433; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
+                color: white; border: 2px solid #CC4433; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFAA99, stop:1 #FF8877);
+                border: 3px solid #EE6655;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC4433, stop:1 #AA2211);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         self.cylinder_1_status_label = QLabel("狀態: 未知")
@@ -419,20 +564,50 @@ class RobotControlUI(QMainWindow):
         self.valve_2_on_button.setEnabled(False)
         self.valve_2_on_button.clicked.connect(self.valve_2_on)
         self.valve_2_on_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #99DDFF, stop:1 #66BBEE);
-            color: #003D79; border: 2px solid #3399CC; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #99DDFF, stop:1 #66BBEE);
+                color: #003D79; border: 2px solid #3399CC; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #BBFFFF, stop:1 #99DDFF);
+                border: 3px solid #55BBEE;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3399CC, stop:1 #1177AA);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 2px solid #BBBBBB;
+            }
         """)
         
         self.valve_2_off_button = QPushButton("關閉 (OFF)")
         self.valve_2_off_button.setEnabled(False)
         self.valve_2_off_button.clicked.connect(self.valve_2_off)
         self.valve_2_off_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
-            color: #333333; border: 2px solid #999999; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
+                color: #333333; border: 2px solid #999999; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #EEEEEE, stop:1 #CCCCCC);
+                border: 3px solid #AAAAAA;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #AAAAAA, stop:1 #888888);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #EEEEEE;
+                color: #AAAAAA;
+                border: 2px solid #CCCCCC;
+            }
         """)
         
         self.valve_2_status_label = QLabel("狀態: 關閉")
@@ -455,20 +630,50 @@ class RobotControlUI(QMainWindow):
         self.cylinder_2_extend_button.setEnabled(False)
         self.cylinder_2_extend_button.clicked.connect(self.cylinder_2_extend)
         self.cylinder_2_extend_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
-            color: white; border: 2px solid #338855; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
+                color: white; border: 2px solid #338855; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #88EEBB, stop:1 #66CC99);
+                border: 3px solid #44AA77;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #338855, stop:1 #226644);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         self.cylinder_2_retract_button = QPushButton("收回")
         self.cylinder_2_retract_button.setEnabled(False)
         self.cylinder_2_retract_button.clicked.connect(self.cylinder_2_retract)
         self.cylinder_2_retract_button.setStyleSheet("""
-            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
-            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
-            color: white; border: 2px solid #CC4433; border-radius: 6px;
-            padding: 10px 18px; min-height: 40px; min-width: 110px;
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
+                color: white; border: 2px solid #CC4433; border-radius: 6px;
+                padding: 10px 18px; min-height: 40px; min-width: 110px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFAA99, stop:1 #FF8877);
+                border: 3px solid #EE6655;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC4433, stop:1 #AA2211);
+                padding: 12px 16px 8px 20px;
+            }
+            QPushButton:disabled {
+                background: #CCCCCC;
+                color: #888888;
+                border: 2px solid #AAAAAA;
+            }
         """)
         
         self.cylinder_2_status_label = QLabel("狀態: 未知")
