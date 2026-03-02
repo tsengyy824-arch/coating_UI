@@ -235,7 +235,7 @@ class RobotControlUI(QMainWindow):
     
     def create_valve_group(self):
         """創建膠閥控制組"""
-        group = QGroupBox("螺桿膠閥控制 (IO 控制)")
+        group = QGroupBox("手動IO控制")
         layout = QVBoxLayout()
         
         # 從配置讀取字體大小
@@ -267,6 +267,32 @@ class RobotControlUI(QMainWindow):
         valve_1_layout.addStretch()
         valve_1_layout.addWidget(self.valve_status_label)
         
+        # 第一組氣缸：圍壩膠伸縮汽缸
+        cylinder_1_layout = QHBoxLayout()
+        
+        cylinder_1_label = QLabel("  └ 伸縮汽缸:")
+        cylinder_1_label.setFont(QFont("Arial", button_font_size))
+        
+        self.cylinder_1_extend_button = QPushButton("伸出")
+        self.cylinder_1_extend_button.setEnabled(False)
+        self.cylinder_1_extend_button.clicked.connect(self.cylinder_1_extend)
+        self.cylinder_1_extend_button.setStyleSheet(f"background-color: lightgreen; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.cylinder_1_retract_button = QPushButton("收回")
+        self.cylinder_1_retract_button.setEnabled(False)
+        self.cylinder_1_retract_button.clicked.connect(self.cylinder_1_retract)
+        self.cylinder_1_retract_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.cylinder_1_status_label = QLabel("狀態: 未知")
+        self.cylinder_1_status_label.setFont(QFont("Arial", button_font_size))
+        self.cylinder_1_status_label.setStyleSheet("color: gray;")
+        
+        cylinder_1_layout.addWidget(cylinder_1_label)
+        cylinder_1_layout.addWidget(self.cylinder_1_extend_button)
+        cylinder_1_layout.addWidget(self.cylinder_1_retract_button)
+        cylinder_1_layout.addStretch()
+        cylinder_1_layout.addWidget(self.cylinder_1_status_label)
+        
         # 第二組膠閥：熱固化三防滴膠閥
         valve_2_layout = QHBoxLayout()
         
@@ -293,8 +319,36 @@ class RobotControlUI(QMainWindow):
         valve_2_layout.addStretch()
         valve_2_layout.addWidget(self.valve_2_status_label)
         
+        # 第二組氣缸：熱固化三防膠伸縮汽缸
+        cylinder_2_layout = QHBoxLayout()
+        
+        cylinder_2_label = QLabel("  └ 伸縮汽缸:")
+        cylinder_2_label.setFont(QFont("Arial", button_font_size))
+        
+        self.cylinder_2_extend_button = QPushButton("伸出")
+        self.cylinder_2_extend_button.setEnabled(False)
+        self.cylinder_2_extend_button.clicked.connect(self.cylinder_2_extend)
+        self.cylinder_2_extend_button.setStyleSheet(f"background-color: lightgreen; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.cylinder_2_retract_button = QPushButton("收回")
+        self.cylinder_2_retract_button.setEnabled(False)
+        self.cylinder_2_retract_button.clicked.connect(self.cylinder_2_retract)
+        self.cylinder_2_retract_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.cylinder_2_status_label = QLabel("狀態: 未知")
+        self.cylinder_2_status_label.setFont(QFont("Arial", button_font_size))
+        self.cylinder_2_status_label.setStyleSheet("color: gray;")
+        
+        cylinder_2_layout.addWidget(cylinder_2_label)
+        cylinder_2_layout.addWidget(self.cylinder_2_extend_button)
+        cylinder_2_layout.addWidget(self.cylinder_2_retract_button)
+        cylinder_2_layout.addStretch()
+        cylinder_2_layout.addWidget(self.cylinder_2_status_label)
+        
         layout.addLayout(valve_1_layout)
+        layout.addLayout(cylinder_1_layout)
         layout.addLayout(valve_2_layout)
+        layout.addLayout(cylinder_2_layout)
         
         group.setLayout(layout)
         return group
@@ -365,6 +419,10 @@ class RobotControlUI(QMainWindow):
         self.valve_off_button.setEnabled(False)
         self.valve_2_on_button.setEnabled(False)
         self.valve_2_off_button.setEnabled(False)
+        self.cylinder_1_extend_button.setEnabled(False)
+        self.cylinder_1_retract_button.setEnabled(False)
+        self.cylinder_2_extend_button.setEnabled(False)
+        self.cylinder_2_retract_button.setEnabled(False)
         self.statusBar().showMessage("已斷開 Modbus 連接")
     
     def show_tutorial(self):
@@ -398,6 +456,10 @@ class RobotControlUI(QMainWindow):
                 self.valve_off_button.setEnabled(True)
                 self.valve_2_on_button.setEnabled(True)
                 self.valve_2_off_button.setEnabled(True)
+                self.cylinder_1_extend_button.setEnabled(True)
+                self.cylinder_1_retract_button.setEnabled(True)
+                self.cylinder_2_extend_button.setEnabled(True)
+                self.cylinder_2_retract_button.setEnabled(True)
                 # 禁用自動相關控制
                 self.valve_type_combo.setEnabled(False)
                 self.path_combo.setEnabled(False)
@@ -423,6 +485,10 @@ class RobotControlUI(QMainWindow):
             self.valve_off_button.setEnabled(False)
             self.valve_2_on_button.setEnabled(False)
             self.valve_2_off_button.setEnabled(False)
+            self.cylinder_1_extend_button.setEnabled(False)
+            self.cylinder_1_retract_button.setEnabled(False)
+            self.cylinder_2_extend_button.setEnabled(False)
+            self.cylinder_2_retract_button.setEnabled(False)
             self.statusBar().showMessage("機械臂已停止 - 請重新啟動手臂")
         else:
             QMessageBox.warning(self, "控制失敗", "無法停止機械臂")
@@ -454,6 +520,10 @@ class RobotControlUI(QMainWindow):
             self.valve_off_button.setEnabled(False)
             self.valve_2_on_button.setEnabled(False)
             self.valve_2_off_button.setEnabled(False)
+            self.cylinder_1_extend_button.setEnabled(False)
+            self.cylinder_1_retract_button.setEnabled(False)
+            self.cylinder_2_extend_button.setEnabled(False)
+            self.cylinder_2_retract_button.setEnabled(False)
         else:
             self.is_auto_mode = False
             # 寫入手動模式信號到線圈 1
@@ -472,6 +542,10 @@ class RobotControlUI(QMainWindow):
             self.valve_off_button.setEnabled(True)
             self.valve_2_on_button.setEnabled(True)
             self.valve_2_off_button.setEnabled(True)
+            self.cylinder_1_extend_button.setEnabled(True)
+            self.cylinder_1_retract_button.setEnabled(True)
+            self.cylinder_2_extend_button.setEnabled(True)
+            self.cylinder_2_retract_button.setEnabled(True)
     
     def on_valve_type_changed(self):
         """塗膠閥類型改變時觸發"""
@@ -676,6 +750,54 @@ class RobotControlUI(QMainWindow):
             self.statusBar().showMessage("熱固化三防滴膠閥已關閉")
         else:
             QMessageBox.warning(self, "控制失敗", "無法關閉熱固化三防滴膠閥")
+    
+    def cylinder_1_extend(self):
+        """圍壩膠氣缸伸出"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'CYLINDER_1_EXTEND_COIL'),
+            True
+        ):
+            self.cylinder_1_status_label.setText("狀態: 伸出")
+            self.cylinder_1_status_label.setStyleSheet("color: green;")
+            self.statusBar().showMessage("圍壩膠氣缸已伸出")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法伸出圍壩膠氣缸")
+    
+    def cylinder_1_retract(self):
+        """圍壩膠氣缸收回"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'CYLINDER_1_RETRACT_COIL'),
+            True
+        ):
+            self.cylinder_1_status_label.setText("狀態: 收回")
+            self.cylinder_1_status_label.setStyleSheet("color: red;")
+            self.statusBar().showMessage("圍壩膠氣缸已收回")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法收回圍壩膠氣缸")
+    
+    def cylinder_2_extend(self):
+        """熱固化三防膠氣缸伸出"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'CYLINDER_2_EXTEND_COIL'),
+            True
+        ):
+            self.cylinder_2_status_label.setText("狀態: 伸出")
+            self.cylinder_2_status_label.setStyleSheet("color: green;")
+            self.statusBar().showMessage("熱固化三防膠氣缸已伸出")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法伸出熱固化三防膠氣缸")
+    
+    def cylinder_2_retract(self):
+        """熱固化三防膠氣缸收回"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'CYLINDER_2_RETRACT_COIL'),
+            True
+        ):
+            self.cylinder_2_status_label.setText("狀態: 收回")
+            self.cylinder_2_status_label.setStyleSheet("color: red;")
+            self.statusBar().showMessage("熱固化三防膠氣缸已收回")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法收回熱固化三防膠氣缸")
     
     def update_status(self):
         """定時更新系統狀態"""
