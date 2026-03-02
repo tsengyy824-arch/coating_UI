@@ -236,29 +236,65 @@ class RobotControlUI(QMainWindow):
     def create_valve_group(self):
         """創建膠閥控制組"""
         group = QGroupBox("螺桿膠閥控制 (IO 控制)")
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
         
         # 從配置讀取字體大小
         button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
         
-        self.valve_on_button = QPushButton("塗膠 (ON)")
+        # 第一組膠閥：塗膠（圍壩膠）
+        valve_1_layout = QHBoxLayout()
+        
+        valve_1_label = QLabel("塗膠閥 (圍壩膠):")
+        valve_1_label.setFont(QFont("Arial", button_font_size))
+        
+        self.valve_on_button = QPushButton("開啟 (ON)")
         self.valve_on_button.setEnabled(False)
         self.valve_on_button.clicked.connect(self.valve_on)
-        self.valve_on_button.setStyleSheet(f"background-color: lightyellow; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 100px;")
+        self.valve_on_button.setStyleSheet(f"background-color: lightyellow; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
         
-        self.valve_off_button = QPushButton("停膠 (OFF)")
+        self.valve_off_button = QPushButton("關閉 (OFF)")
         self.valve_off_button.setEnabled(False)
         self.valve_off_button.clicked.connect(self.valve_off)
-        self.valve_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 100px;")
+        self.valve_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
         
-        self.valve_status_label = QLabel("狀態: 停膠")
+        self.valve_status_label = QLabel("狀態: 關閉")
         self.valve_status_label.setFont(QFont("Arial", button_font_size))
         self.valve_status_label.setStyleSheet("color: blue;")
         
-        layout.addWidget(self.valve_on_button)
-        layout.addWidget(self.valve_off_button)
-        layout.addStretch()
-        layout.addWidget(self.valve_status_label)
+        valve_1_layout.addWidget(valve_1_label)
+        valve_1_layout.addWidget(self.valve_on_button)
+        valve_1_layout.addWidget(self.valve_off_button)
+        valve_1_layout.addStretch()
+        valve_1_layout.addWidget(self.valve_status_label)
+        
+        # 第二組膠閥：熱固化三防滴膠閥
+        valve_2_layout = QHBoxLayout()
+        
+        valve_2_label = QLabel("熱固化三防滴膠閥:")
+        valve_2_label.setFont(QFont("Arial", button_font_size))
+        
+        self.valve_2_on_button = QPushButton("開啟 (ON)")
+        self.valve_2_on_button.setEnabled(False)
+        self.valve_2_on_button.clicked.connect(self.valve_2_on)
+        self.valve_2_on_button.setStyleSheet(f"background-color: lightcyan; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.valve_2_off_button = QPushButton("關閉 (OFF)")
+        self.valve_2_off_button.setEnabled(False)
+        self.valve_2_off_button.clicked.connect(self.valve_2_off)
+        self.valve_2_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        
+        self.valve_2_status_label = QLabel("狀態: 關閉")
+        self.valve_2_status_label.setFont(QFont("Arial", button_font_size))
+        self.valve_2_status_label.setStyleSheet("color: blue;")
+        
+        valve_2_layout.addWidget(valve_2_label)
+        valve_2_layout.addWidget(self.valve_2_on_button)
+        valve_2_layout.addWidget(self.valve_2_off_button)
+        valve_2_layout.addStretch()
+        valve_2_layout.addWidget(self.valve_2_status_label)
+        
+        layout.addLayout(valve_1_layout)
+        layout.addLayout(valve_2_layout)
         
         group.setLayout(layout)
         return group
@@ -327,6 +363,8 @@ class RobotControlUI(QMainWindow):
         self.mode_combo.setEnabled(False)
         self.valve_on_button.setEnabled(False)
         self.valve_off_button.setEnabled(False)
+        self.valve_2_on_button.setEnabled(False)
+        self.valve_2_off_button.setEnabled(False)
         self.statusBar().showMessage("已斷開 Modbus 連接")
     
     def show_tutorial(self):
@@ -358,6 +396,8 @@ class RobotControlUI(QMainWindow):
                 # 手動模式：啟用手動IO控制
                 self.valve_on_button.setEnabled(True)
                 self.valve_off_button.setEnabled(True)
+                self.valve_2_on_button.setEnabled(True)
+                self.valve_2_off_button.setEnabled(True)
                 # 禁用自動相關控制
                 self.valve_type_combo.setEnabled(False)
                 self.path_combo.setEnabled(False)
@@ -381,6 +421,8 @@ class RobotControlUI(QMainWindow):
             self.auto_run_button.setEnabled(False)
             self.valve_on_button.setEnabled(False)
             self.valve_off_button.setEnabled(False)
+            self.valve_2_on_button.setEnabled(False)
+            self.valve_2_off_button.setEnabled(False)
             self.statusBar().showMessage("機械臂已停止 - 請重新啟動手臂")
         else:
             QMessageBox.warning(self, "控制失敗", "無法停止機械臂")
@@ -410,6 +452,8 @@ class RobotControlUI(QMainWindow):
             # 禁用手動IO控制按鈕（自動模式不允許手動塗膠）
             self.valve_on_button.setEnabled(False)
             self.valve_off_button.setEnabled(False)
+            self.valve_2_on_button.setEnabled(False)
+            self.valve_2_off_button.setEnabled(False)
         else:
             self.is_auto_mode = False
             # 寫入手動模式信號到線圈 1
@@ -426,6 +470,8 @@ class RobotControlUI(QMainWindow):
             # 啟用手動IO控制按鈕（手動模式允許手動塗膠）
             self.valve_on_button.setEnabled(True)
             self.valve_off_button.setEnabled(True)
+            self.valve_2_on_button.setEnabled(True)
+            self.valve_2_off_button.setEnabled(True)
     
     def on_valve_type_changed(self):
         """塗膠閥類型改變時觸發"""
@@ -606,6 +652,30 @@ class RobotControlUI(QMainWindow):
             self.statusBar().showMessage("膠閥已關閉 - 停止塗膠")
         else:
             QMessageBox.warning(self, "控制失敗", "無法關閉膠閥")
+    
+    def valve_2_on(self):
+        """打開熱固化三防滴膠閥"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'VALVE_2_ON_COIL'),
+            True
+        ):
+            self.valve_2_status_label.setText("狀態: 開啟 (ON)")
+            self.valve_2_status_label.setStyleSheet("color: green;")
+            self.statusBar().showMessage("熱固化三防滴膠閥已開啟")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法打開熱固化三防滴膠閥")
+    
+    def valve_2_off(self):
+        """關閉熱固化三防滴膠閥"""
+        if self.modbus.write_coil(
+            self.config.getint('IO_CONTROL', 'VALVE_2_OFF_COIL'),
+            True
+        ):
+            self.valve_2_status_label.setText("狀態: 關閉 (OFF)")
+            self.valve_2_status_label.setStyleSheet("color: red;")
+            self.statusBar().showMessage("熱固化三防滴膠閥已關閉")
+        else:
+            QMessageBox.warning(self, "控制失敗", "無法關閉熱固化三防滴膠閥")
     
     def update_status(self):
         """定時更新系統狀態"""
