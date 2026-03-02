@@ -14,6 +14,7 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QColor
 from src.modbus_client import ModbusClient
 from src.dra_path_manager import DRAPathManager
+from src.tutorial_dialog import TutorialDialog
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -117,11 +118,16 @@ class RobotControlUI(QMainWindow):
         self.disconnect_button.setEnabled(False)
         self.disconnect_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 80px;")
         
+        tutorial_button = QPushButton("使用步驟")
+        tutorial_button.clicked.connect(self.show_tutorial)
+        tutorial_button.setStyleSheet(f"background-color: #ff9900; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 100px; color: white; font-weight: bold;")
+        
         layout.addWidget(status_label)
         layout.addWidget(self.connection_label)
         layout.addStretch()
         layout.addWidget(self.connect_button)
         layout.addWidget(self.disconnect_button)
+        layout.addWidget(tutorial_button)
         
         group.setLayout(layout)
         return group
@@ -322,6 +328,11 @@ class RobotControlUI(QMainWindow):
         self.valve_on_button.setEnabled(False)
         self.valve_off_button.setEnabled(False)
         self.statusBar().showMessage("已斷開 Modbus 連接")
+    
+    def show_tutorial(self):
+        """顯示操作教導對話框"""
+        tutorial = TutorialDialog(self)
+        tutorial.exec_()
     
     def start_robot(self):
         """啟動機械臂"""
