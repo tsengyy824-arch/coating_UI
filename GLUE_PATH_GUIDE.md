@@ -1,17 +1,17 @@
 <style>
 h1, h2, h3, h4, h5, h6 { 
-  font-size: 26px; 
+  font-size: 22px; 
   font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
   font-weight: bold;
 }
 
 p, li, td, th, span, blockquote, code {
-  font-size: 18px;
+  font-size: 16px;
   font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
 }
 
 table {
-  font-size: 18px;
+  font-size: 16px;
   font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
 }
 
