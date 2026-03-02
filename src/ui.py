@@ -99,11 +99,13 @@ class RobotControlUI(QMainWindow):
         layout = QHBoxLayout()
         
         # 從配置讀取字體大小
-        conn_label_font_size = self.config.getint('UI', 'CONNECTION_LABEL_FONT_SIZE')
         button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
         
+        status_label = QLabel("狀態:")
+        status_label.setFont(QFont("Arial", button_font_size))
+        
         self.connection_label = QLabel("未連接")
-        self.connection_label.setFont(QFont("Arial", conn_label_font_size, QFont.Bold))
+        self.connection_label.setFont(QFont("Arial", button_font_size, QFont.Bold))
         self.connection_label.setStyleSheet("color: red;")
         
         self.connect_button = QPushButton("連接")
@@ -115,7 +117,7 @@ class RobotControlUI(QMainWindow):
         self.disconnect_button.setEnabled(False)
         self.disconnect_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 80px;")
         
-        layout.addWidget(QLabel("狀態:"))
+        layout.addWidget(status_label)
         layout.addWidget(self.connection_label)
         layout.addStretch()
         layout.addWidget(self.connect_button)
@@ -130,17 +132,17 @@ class RobotControlUI(QMainWindow):
         layout = QHBoxLayout()
         
         # 從配置讀取字體大小
-        control_font_size = self.config.getint('UI', 'CONTROL_BUTTON_FONT_SIZE')
+        button_font_size = self.config.getint('UI', 'CONTROL_BUTTON_FONT_SIZE')
         
         self.start_button = QPushButton("啟動 (START)")
         self.start_button.setEnabled(False)
         self.start_button.clicked.connect(self.start_robot)
-        self.start_button.setStyleSheet(f"background-color: lightgreen; padding: 20px; font-size: {control_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
+        self.start_button.setStyleSheet(f"background-color: lightgreen; padding: 20px; font-size: {button_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
         
         self.stop_button = QPushButton("停止 (STOP)")
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self.stop_robot)
-        self.stop_button.setStyleSheet(f"background-color: lightcoral; padding: 20px; font-size: {control_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
+        self.stop_button.setStyleSheet(f"background-color: lightcoral; padding: 20px; font-size: {button_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
         
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
@@ -153,16 +155,20 @@ class RobotControlUI(QMainWindow):
         group = QGroupBox("運行模式")
         layout = QVBoxLayout()
         
+        # 從配置讀取字體大小
+        button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
+        
         # 第一行：模式選擇
         mode_layout = QHBoxLayout()
         mode_label = QLabel("模式選擇:")
+        mode_label.setFont(QFont("Arial", button_font_size))
         
         self.mode_combo = QComboBox()
         self.mode_combo.addItem("手動")
         self.mode_combo.addItem("自動")
         self.mode_combo.currentTextChanged.connect(self.change_mode)
         self.mode_combo.setEnabled(False)
-        self.mode_combo.setStyleSheet("padding: 8px;")
+        self.mode_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         
         mode_layout.addWidget(mode_label)
         mode_layout.addWidget(self.mode_combo)
@@ -171,12 +177,13 @@ class RobotControlUI(QMainWindow):
         # 第二行：塗膠閥類型選擇
         valve_layout = QHBoxLayout()
         valve_label = QLabel("塗膠閥類型:")
+        valve_label.setFont(QFont("Arial", button_font_size))
         
         self.valve_type_combo = QComboBox()
         self.valve_type_combo.addItem("圍壩膠塗膠", "valve_1")
         self.valve_type_combo.addItem("熱固三防滴膠", "valve_2")
         self.valve_type_combo.setEnabled(False)
-        self.valve_type_combo.setStyleSheet("padding: 8px;")
+        self.valve_type_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         self.valve_type_combo.currentTextChanged.connect(self.on_valve_type_changed)
         
         valve_layout.addWidget(valve_label)
@@ -186,10 +193,11 @@ class RobotControlUI(QMainWindow):
         # 第三行：塗膠路徑選擇
         path_layout = QHBoxLayout()
         path_label = QLabel("塗膠路徑:")
+        path_label.setFont(QFont("Arial", button_font_size))
         
         self.path_combo = QComboBox()
         self.path_combo.setEnabled(False)
-        self.path_combo.setStyleSheet("padding: 8px;")
+        self.path_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         # 加載塗膠路徑選項
         self.load_glue_paths()
         # 監聽路徑選擇變化
@@ -204,7 +212,8 @@ class RobotControlUI(QMainWindow):
         self.auto_run_button = QPushButton("啟動自動運行塗膠")
         self.auto_run_button.setEnabled(False)
         self.auto_run_button.clicked.connect(self.start_auto_glue)
-        self.auto_run_button.setStyleSheet("background-color: lightblue; padding: 10px; font-size: 12px; min-height: 40px; min-width: 150px; font-weight: bold;")
+        button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
+        self.auto_run_button.setStyleSheet(f"background-color: lightblue; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 150px; font-weight: bold;")
         self.auto_run_button.setVisible(False)  # 初始隱藏
         
         auto_button_layout.addWidget(self.auto_run_button)
@@ -225,7 +234,6 @@ class RobotControlUI(QMainWindow):
         
         # 從配置讀取字體大小
         button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
-        status_font_size = self.config.getint('UI', 'STATUS_LABEL_FONT_SIZE')
         
         self.valve_on_button = QPushButton("塗膠 (ON)")
         self.valve_on_button.setEnabled(False)
@@ -238,7 +246,7 @@ class RobotControlUI(QMainWindow):
         self.valve_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 100px;")
         
         self.valve_status_label = QLabel("狀態: 停膠")
-        self.valve_status_label.setFont(QFont("Arial", status_font_size))
+        self.valve_status_label.setFont(QFont("Arial", button_font_size))
         self.valve_status_label.setStyleSheet("color: blue;")
         
         layout.addWidget(self.valve_on_button)
@@ -254,20 +262,27 @@ class RobotControlUI(QMainWindow):
         group = QGroupBox("系統狀態")
         layout = QVBoxLayout()
         
+        # 從配置讀取字體大小
+        status_font_size = self.config.getint('UI', 'STATUS_LABEL_FONT_SIZE')
+        
         # 運行狀態顯示
         run_status_layout = QHBoxLayout()
-        run_status_layout.addWidget(QLabel("運行狀態:"))
+        run_status_title = QLabel("運行狀態:")
+        run_status_title.setFont(QFont("Arial", status_font_size))
+        run_status_layout.addWidget(run_status_title)
         self.run_status_label = QLabel("已停止")
-        self.run_status_label.setFont(QFont("Arial", 12, QFont.Bold))
+        self.run_status_label.setFont(QFont("Arial", status_font_size, QFont.Bold))
         self.run_status_label.setStyleSheet("color: red;")
         run_status_layout.addWidget(self.run_status_label)
         run_status_layout.addStretch()
         
         # 當前模式顯示
         mode_status_layout = QHBoxLayout()
-        mode_status_layout.addWidget(QLabel("當前模式:"))
+        mode_status_title = QLabel("當前模式:")
+        mode_status_title.setFont(QFont("Arial", status_font_size))
+        mode_status_layout.addWidget(mode_status_title)
         self.current_mode_label = QLabel("手動")
-        self.current_mode_label.setFont(QFont("Arial", 12, QFont.Bold))
+        self.current_mode_label.setFont(QFont("Arial", status_font_size, QFont.Bold))
         self.current_mode_label.setStyleSheet("color: blue;")
         mode_status_layout.addWidget(self.current_mode_label)
         mode_status_layout.addStretch()
