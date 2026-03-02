@@ -1,3 +1,25 @@
+<style>
+h1, h2, h3, h4, h5, h6 { 
+  font-size: 32px; 
+  font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+  font-weight: bold;
+}
+
+p, li, td, th, span, blockquote, code {
+  font-size: 22px;
+  font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+}
+
+table {
+  font-size: 22px;
+  font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+}
+
+body {
+  font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+}
+</style>
+
 # 新增功能說明 - 塗膠路徑選擇與自動運行模式
 
 ## 功能概述
@@ -55,8 +77,7 @@ AUTO_GLUE_COIL=2
 
 ## Modbus 信號對應
 
-|git config --global user.name "您的名字"
-git config --global user.email "您的邮箱"|
+|gitgit clone https://github.com/tsengyy824-arch/coating_UI.git|
 | 自動塗膠 | 2 | True | 線圈 2 寫入 True 啟動自動塗膠 |
 
 ## DRA Studio 路徑程式集成
