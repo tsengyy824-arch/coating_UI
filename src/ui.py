@@ -62,6 +62,76 @@ class RobotControlUI(QMainWindow):
                         self.config.getint('UI', 'WINDOW_WIDTH'),
                         self.config.getint('UI', 'WINDOW_HEIGHT'))
         
+        # 設置整體樣式 - 台達風格配色
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #F5F5F5;
+            }
+            QGroupBox {
+                font-family: '微軟正黑體', 'Microsoft JhengHei';
+                font-size: 22px;
+                font-weight: bold;
+                color: #003D79;
+                border: 2px solid #0099CC;
+                border-radius: 8px;
+                margin-top: 15px;
+                padding-top: 10px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 5px 10px;
+                background-color: #003D79;
+                color: white;
+                border-radius: 4px;
+            }
+            QLabel {
+                font-family: '微軟正黑體', 'Microsoft JhengHei';
+                font-size: 16px;
+                color: #333333;
+            }
+            QComboBox {
+                font-family: '微軟正黑體', 'Microsoft JhengHei';
+                font-size: 16px;
+                background-color: white;
+                border: 2px solid #0099CC;
+                border-radius: 6px;
+                padding: 8px 15px;
+                min-height: 30px;
+                color: #003D79;
+            }
+            QComboBox:hover {
+                border: 2px solid #003D79;
+                background-color: #E6F7FF;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 30px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 8px solid #003D79;
+                margin-right: 10px;
+            }
+            QComboBox QAbstractItemView {
+                font-family: '微軟正黑體', 'Microsoft JhengHei';
+                font-size: 16px;
+                background-color: white;
+                border: 2px solid #0099CC;
+                selection-background-color: #0099CC;
+                selection-color: white;
+            }
+            QStatusBar {
+                font-family: '微軟正黑體', 'Microsoft JhengHei';
+                font-size: 14px;
+                background-color: #003D79;
+                color: white;
+            }
+        """)
+        
         # 創建中央 Widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -111,16 +181,31 @@ class RobotControlUI(QMainWindow):
         
         self.connect_button = QPushButton("連接")
         self.connect_button.clicked.connect(self.connect_modbus)
-        self.connect_button.setStyleSheet(f"background-color: lightblue; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 80px;")
+        self.connect_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
+            color: white; border: 2px solid #006699; border-radius: 8px;
+            padding: 12px 20px; min-height: 40px; min-width: 80px;
+        """)
         
         self.disconnect_button = QPushButton("斷開")
         self.disconnect_button.clicked.connect(self.disconnect_modbus)
         self.disconnect_button.setEnabled(False)
-        self.disconnect_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 80px;")
+        self.disconnect_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CC3333, stop:1 #AA2222);
+            color: white; border: 2px solid #992222; border-radius: 8px;
+            padding: 12px 20px; min-height: 40px; min-width: 80px;
+        """)
         
         tutorial_button = QPushButton("使用步驟")
         tutorial_button.clicked.connect(self.show_tutorial)
-        tutorial_button.setStyleSheet(f"background-color: #ff9900; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 100px; color: white; font-weight: bold;")
+        tutorial_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF9900, stop:1 #DD7700);
+            color: white; border: 2px solid #CC6600; border-radius: 8px;
+            padding: 12px 20px; min-height: 40px; min-width: 100px;
+        """)
         
         layout.addWidget(status_label)
         layout.addWidget(self.connection_label)
@@ -143,12 +228,22 @@ class RobotControlUI(QMainWindow):
         self.start_button = QPushButton("啟動 (START)")
         self.start_button.setEnabled(False)
         self.start_button.clicked.connect(self.start_robot)
-        self.start_button.setStyleSheet(f"background-color: lightgreen; padding: 20px; font-size: {button_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
+        self.start_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #00CC66, stop:1 #00AA55);
+            color: white; border: 3px solid #008844; border-radius: 10px;
+            padding: 15px 25px; min-height: 50px; min-width: 130px;
+        """)
         
         self.stop_button = QPushButton("停止 (STOP)")
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self.stop_robot)
-        self.stop_button.setStyleSheet(f"background-color: lightcoral; padding: 20px; font-size: {button_font_size}px; font-weight: bold; min-height: 50px; min-width: 120px;")
+        self.stop_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 18px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF4444, stop:1 #DD2222);
+            color: white; border: 3px solid #BB1111; border-radius: 10px;
+            padding: 15px 25px; min-height: 50px; min-width: 130px;
+        """)
         
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
@@ -174,7 +269,6 @@ class RobotControlUI(QMainWindow):
         self.mode_combo.addItem("自動")
         self.mode_combo.currentTextChanged.connect(self.change_mode)
         self.mode_combo.setEnabled(False)
-        self.mode_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         
         mode_layout.addWidget(mode_label)
         mode_layout.addWidget(self.mode_combo)
@@ -189,7 +283,6 @@ class RobotControlUI(QMainWindow):
         self.valve_type_combo.addItem("圍壩膠塗膠", "valve_1")
         self.valve_type_combo.addItem("熱固三防滴膠", "valve_2")
         self.valve_type_combo.setEnabled(False)
-        self.valve_type_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         self.valve_type_combo.currentTextChanged.connect(self.on_valve_type_changed)
         
         valve_layout.addWidget(valve_label)
@@ -203,7 +296,6 @@ class RobotControlUI(QMainWindow):
         
         self.path_combo = QComboBox()
         self.path_combo.setEnabled(False)
-        self.path_combo.setStyleSheet(f"padding: 8px; font-size: {button_font_size}px;")
         # 加載塗膠路徑選項
         self.load_glue_paths()
         # 監聽路徑選擇變化
@@ -218,8 +310,12 @@ class RobotControlUI(QMainWindow):
         self.auto_run_button = QPushButton("啟動自動運行塗膠")
         self.auto_run_button.setEnabled(False)
         self.auto_run_button.clicked.connect(self.start_auto_glue)
-        button_font_size = self.config.getint('UI', 'BUTTON_FONT_SIZE')
-        self.auto_run_button.setStyleSheet(f"background-color: lightblue; padding: 15px; font-size: {button_font_size}px; min-height: 40px; min-width: 150px; font-weight: bold;")
+        self.auto_run_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0099CC, stop:1 #0077AA);
+            color: white; border: 2px solid #006699; border-radius: 8px;
+            padding: 12px 20px; min-height: 40px; min-width: 180px;
+        """)
         self.auto_run_button.setVisible(False)  # 初始隱藏
         
         auto_button_layout.addWidget(self.auto_run_button)
@@ -250,12 +346,22 @@ class RobotControlUI(QMainWindow):
         self.valve_on_button = QPushButton("開啟 (ON)")
         self.valve_on_button.setEnabled(False)
         self.valve_on_button.clicked.connect(self.valve_on)
-        self.valve_on_button.setStyleSheet(f"background-color: lightyellow; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.valve_on_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFE680, stop:1 #FFD966);
+            color: #003D79; border: 2px solid #CCAA00; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.valve_off_button = QPushButton("關閉 (OFF)")
         self.valve_off_button.setEnabled(False)
         self.valve_off_button.clicked.connect(self.valve_off)
-        self.valve_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.valve_off_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
+            color: #333333; border: 2px solid #999999; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.valve_status_label = QLabel("狀態: 關閉")
         self.valve_status_label.setFont(QFont("Arial", button_font_size))
@@ -276,12 +382,22 @@ class RobotControlUI(QMainWindow):
         self.cylinder_1_extend_button = QPushButton("伸出")
         self.cylinder_1_extend_button.setEnabled(False)
         self.cylinder_1_extend_button.clicked.connect(self.cylinder_1_extend)
-        self.cylinder_1_extend_button.setStyleSheet(f"background-color: lightgreen; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.cylinder_1_extend_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
+            color: white; border: 2px solid #338855; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.cylinder_1_retract_button = QPushButton("收回")
         self.cylinder_1_retract_button.setEnabled(False)
         self.cylinder_1_retract_button.clicked.connect(self.cylinder_1_retract)
-        self.cylinder_1_retract_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.cylinder_1_retract_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
+            color: white; border: 2px solid #CC4433; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.cylinder_1_status_label = QLabel("狀態: 未知")
         self.cylinder_1_status_label.setFont(QFont("Arial", button_font_size))
@@ -302,12 +418,22 @@ class RobotControlUI(QMainWindow):
         self.valve_2_on_button = QPushButton("開啟 (ON)")
         self.valve_2_on_button.setEnabled(False)
         self.valve_2_on_button.clicked.connect(self.valve_2_on)
-        self.valve_2_on_button.setStyleSheet(f"background-color: lightcyan; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.valve_2_on_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #99DDFF, stop:1 #66BBEE);
+            color: #003D79; border: 2px solid #3399CC; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.valve_2_off_button = QPushButton("關閉 (OFF)")
         self.valve_2_off_button.setEnabled(False)
         self.valve_2_off_button.clicked.connect(self.valve_2_off)
-        self.valve_2_off_button.setStyleSheet(f"background-color: lightgray; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.valve_2_off_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #DDDDDD, stop:1 #BBBBBB);
+            color: #333333; border: 2px solid #999999; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.valve_2_status_label = QLabel("狀態: 關閉")
         self.valve_2_status_label.setFont(QFont("Arial", button_font_size))
@@ -328,12 +454,22 @@ class RobotControlUI(QMainWindow):
         self.cylinder_2_extend_button = QPushButton("伸出")
         self.cylinder_2_extend_button.setEnabled(False)
         self.cylinder_2_extend_button.clicked.connect(self.cylinder_2_extend)
-        self.cylinder_2_extend_button.setStyleSheet(f"background-color: lightgreen; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.cylinder_2_extend_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #66CC99, stop:1 #44AA77);
+            color: white; border: 2px solid #338855; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.cylinder_2_retract_button = QPushButton("收回")
         self.cylinder_2_retract_button.setEnabled(False)
         self.cylinder_2_retract_button.clicked.connect(self.cylinder_2_retract)
-        self.cylinder_2_retract_button.setStyleSheet(f"background-color: lightcoral; padding: 15px; font-size: {button_font_size}px; min-height: 45px; min-width: 120px;")
+        self.cylinder_2_retract_button.setStyleSheet("""
+            font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+            background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF8877, stop:1 #EE6655);
+            color: white; border: 2px solid #CC4433; border-radius: 6px;
+            padding: 10px 18px; min-height: 40px; min-width: 110px;
+        """)
         
         self.cylinder_2_status_label = QLabel("狀態: 未知")
         self.cylinder_2_status_label.setFont(QFont("Arial", button_font_size))
