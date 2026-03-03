@@ -30,6 +30,7 @@ class ModbusClient:
         self.retries = retries
         self.client = None
         self.is_connected = False
+        self.last_error = ""
     
     def connect(self):
         """連接到 Modbus 伺服器"""
@@ -42,12 +43,15 @@ class ModbusClient:
             result = self.client.connect()
             if result:
                 self.is_connected = True
+                self.last_error = ""
                 logger.info(f"成功連接到 Modbus 伺服器 {self.host}:{self.port}")
                 return True
             else:
+                self.last_error = f"無法連接到 Modbus 伺服器 {self.host}:{self.port}"
                 logger.error(f"無法連接到 Modbus 伺服器 {self.host}:{self.port}")
                 return False
         except Exception as e:
+            self.last_error = str(e)
             logger.error(f"連接 Modbus 伺服器時出錯: {e}")
             return False
     
@@ -56,6 +60,7 @@ class ModbusClient:
         if self.client:
             self.client.close()
             self.is_connected = False
+            self.last_error = ""
             logger.info("已斷開 Modbus 連接")
     
     def read_coil(self, address, count=1):
@@ -74,7 +79,7 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return None
             
-            result = self.client.read_coils(address, count=count, device_id=1)
+            result = self.client.read_coils(address, count=count)
             if isinstance(result, ModbusException):
                 logger.error(f"讀取線圈時出錯: {result}")
                 return None
@@ -99,7 +104,7 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return False
             
-            result = self.client.write_coil(address, value, device_id=1)
+            result = self.client.write_coil(address, value)
             if isinstance(result, ModbusException):
                 logger.error(f"寫入線圈時出錯: {result}")
                 return False
@@ -107,6 +112,39 @@ class ModbusClient:
             return True
         except Exception as e:
             logger.error(f"寫入線圈時出現異常: {e}")
+            return False
+    
+    def write_do(self, register_address, bit_value):
+        """
+        寫入 DO (數位輸出) - 使用16位元寄存器的位元控制
+        
+        Args:
+            register_address (int): 寄存器地址 (0-6)
+            bit_value (int): 16位元值 (如 0x0001, 0x0100, 0x0000)
+            
+        Returns:
+            bool: 是否成功
+        """
+        try:
+            if not self.is_connected:
+                self.last_error = "未連接到 Modbus 伺服器"
+                logger.warning("未連接到 Modbus 伺服器")
+                return False
+            
+            # 先記錄寫入信息
+            logger.info(f"準備寫入 DO 寄存器 {register_address} (0x{register_address:04X}): 0x{bit_value:04X} (二進制: {bin(bit_value)})")
+            
+            result = self.client.write_register(register_address, bit_value)
+            if isinstance(result, ModbusException):
+                self.last_error = str(result)
+                logger.error(f"寫入 DO 寄存器時出錯: {result}")
+                return False
+            self.last_error = ""
+            logger.info(f"成功寫入 DO 寄存器 {register_address}: 0x{bit_value:04X}")
+            return True
+        except Exception as e:
+            self.last_error = str(e)
+            logger.error(f"寫入 DO 寄存器時出現異常: {e}")
             return False
     
     def read_register(self, address, count=1):
@@ -125,11 +163,15 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return None
             
-            result = self.client.read_holding_registers(address, count=count, device_id=1)
+            logger.info(f"準備讀取寄存器 {address} (0x{address:04X}), 數量: {count}")
+            result = self.client.read_holding_registers(address, count=count)
             if isinstance(result, ModbusException):
                 logger.error(f"讀取寄存器時出錯: {result}")
                 return None
-            return result.registers if hasattr(result, 'registers') else None
+            registers = result.registers if hasattr(result, 'registers') else None
+            if registers:
+                logger.info(f"成功讀取寄存器 {address}: {registers}")
+            return registers
         except Exception as e:
             logger.error(f"讀取寄存器時出現異常: {e}")
             return None
@@ -150,7 +192,7 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return False
             
-            result = self.client.write_register(address, value, device_id=1)
+            result = self.client.write_register(address, value)
             if isinstance(result, ModbusException):
                 logger.error(f"寫入寄存器時出錯: {result}")
                 return False
@@ -176,7 +218,7 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return None
             
-            result = self.client.read_holding_registers(start_address, count=count, device_id=1)
+            result = self.client.read_holding_registers(start_address, count=count)
             if isinstance(result, ModbusException):
                 logger.error(f"批量讀取寄存器時出錯: {result}")
                 return None
@@ -206,7 +248,7 @@ class ModbusClient:
                 logger.warning("未連接到 Modbus 伺服器")
                 return False
             
-            result = self.client.write_registers(start_address, values, device_id=1)
+            result = self.client.write_registers(start_address, values)
             if isinstance(result, ModbusException):
                 logger.error(f"批量寫入寄存器時出錯: {result}")
                 return False

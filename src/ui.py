@@ -314,9 +314,61 @@ class RobotControlUI(QMainWindow):
                 border: 3px solid #BBBBBB;
             }
         """)
+
+        self.servo_on_diagnose_button = QPushButton("Servo ON 診斷")
+        self.servo_on_diagnose_button.setEnabled(False)
+        self.servo_on_diagnose_button.clicked.connect(self.servo_on_diagnostic)
+        self.servo_on_diagnose_button.setStyleSheet("""
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3366CC, stop:1 #2244AA);
+                color: white; border: 2px solid #1A3380; border-radius: 8px;
+                padding: 12px 20px; min-height: 45px; min-width: 140px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5588EE, stop:1 #3366CC);
+                border: 3px solid #3366CC;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #1A3380, stop:1 #112255);
+                padding: 14px 18px 10px 22px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 2px solid #BBBBBB;
+            }
+        """)
+
+        self.servo_off_diagnose_button = QPushButton("Servo OFF 診斷")
+        self.servo_off_diagnose_button.setEnabled(False)
+        self.servo_off_diagnose_button.clicked.connect(self.servo_off_diagnostic)
+        self.servo_off_diagnose_button.setStyleSheet("""
+            QPushButton {
+                font-family: '微軟正黑體'; font-size: 16px; font-weight: bold;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF9900, stop:1 #DD7700);
+                color: white; border: 2px solid #BB5500; border-radius: 8px;
+                padding: 12px 20px; min-height: 45px; min-width: 140px;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFBB22, stop:1 #FF9900);
+                border: 3px solid #FF9900;
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #BB5500, stop:1 #993300);
+                padding: 14px 18px 10px 22px;
+            }
+            QPushButton:disabled {
+                background: #DDDDDD;
+                color: #999999;
+                border: 2px solid #BBBBBB;
+            }
+        """)
         
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
+        layout.addWidget(self.servo_on_diagnose_button)
+        layout.addWidget(self.servo_off_diagnose_button)
         
         group.setLayout(layout)
         return group
@@ -739,6 +791,8 @@ class RobotControlUI(QMainWindow):
             self.disconnect_button.setEnabled(True)
             self.start_button.setEnabled(True)
             self.stop_button.setEnabled(True)
+            self.servo_on_diagnose_button.setEnabled(True)
+            self.servo_off_diagnose_button.setEnabled(True)
             # 連接後不啟用模式選擇，需要先啟動手臂
             self.mode_combo.setEnabled(False)
             self.statusBar().showMessage("已成功連接到 Modbus 伺服器 - 請先啟動手臂")
@@ -755,6 +809,8 @@ class RobotControlUI(QMainWindow):
         self.disconnect_button.setEnabled(False)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(False)
+        self.servo_on_diagnose_button.setEnabled(False)
+        self.servo_off_diagnose_button.setEnabled(False)
         self.mode_combo.setEnabled(False)
         self.valve_on_button.setEnabled(False)
         self.valve_off_button.setEnabled(False)
@@ -770,48 +826,136 @@ class RobotControlUI(QMainWindow):
         """顯示操作教導對話框"""
         tutorial = TutorialDialog(self)
         tutorial.exec_()
+
+    def servo_on_diagnostic(self):
+        """Servo ON 診斷命令"""
+        self.run_servo_diagnostic(is_servo_on=True)
+
+    def servo_off_diagnostic(self):
+        """Servo OFF 診斷命令"""
+        self.run_servo_diagnostic(is_servo_on=False)
+
+    def run_servo_diagnostic(self, is_servo_on):
+        """執行伺服診斷並顯示實際送出寄存器和值"""
+        if not self.modbus or not self.modbus.is_connected:
+            QMessageBox.warning(self, "警告", "請先連接到 DRA 控制器")
+            return
+
+        try:
+            servo_register = self.config.getint('SERVO_CONTROL', 'SERVO_REGISTER')
+            servo_on_value = self.config.getint('SERVO_CONTROL', 'SERVO_ON_VALUE')
+            servo_off_value = self.config.getint('SERVO_CONTROL', 'SERVO_OFF_VALUE')
+
+            command_name = "Servo ON" if is_servo_on else "Servo OFF"
+            command_value = servo_on_value if is_servo_on else servo_off_value
+
+            self.statusBar().showMessage(
+                f"診斷中: {command_name} (D{servo_register} = {command_value})"
+            )
+            result = self.modbus.write_do(servo_register, command_value)
+
+            result_text = "成功" if result else "失敗"
+            detail_text = ""
+            if not result:
+                detail_text = f"\n錯誤詳情: {self.modbus.last_error}"
+            message = (
+                f"診斷命令: {command_name}\n"
+                f"實際寄存器: D{servo_register}\n"
+                f"實際寫入值: {command_value} (0x{command_value:04X})\n"
+                f"執行結果: {result_text}"
+                f"{detail_text}"
+            )
+
+            if result:
+                QMessageBox.information(self, "Servo 診斷結果", message)
+                self.statusBar().showMessage(f"{command_name} 診斷成功")
+            else:
+                QMessageBox.warning(self, "Servo 診斷結果", message)
+                self.statusBar().showMessage(f"{command_name} 診斷失敗")
+
+        except Exception as e:
+            error_msg = f"診斷命令執行錯誤: {str(e)}"
+            QMessageBox.critical(self, "錯誤", error_msg)
+            self.statusBar().showMessage(error_msg)
     
     def start_robot(self):
-        """啟動機械臂"""
-        if self.modbus.write_coil(0, True):  # 寫入啟動信號到線圈 0
-            self.is_running = True
-            self.run_status_label.setText("運行中")
-            self.run_status_label.setStyleSheet("color: green;")
-            self.start_button.setEnabled(False)
-            self.stop_button.setEnabled(True)
-            # 啟動後啟用模式選擇
-            self.mode_combo.setEnabled(True)
-            # 根據當前模式設置其他控件狀態
-            if self.is_auto_mode:
-                # 自動模式：啟用塗膠閥和路徑選擇
-                self.valve_type_combo.setEnabled(True)
-                self.path_combo.setEnabled(True)
-                if self.path_combo.currentIndex() >= 0:
-                    self.auto_run_button.setEnabled(True)
-                # 禁用手動IO控制
-                self.valve_on_button.setEnabled(False)
-                self.valve_off_button.setEnabled(False)
+        """啟動機械臂（通過配置的伺服寄存器啟用伺服）"""
+        if not self.modbus or not self.modbus.is_connected:
+            QMessageBox.warning(self, "警告", "請先連接到 DRA 控制器")
+            return
+        
+        try:
+            # 讀取伺服寄存器配置（全軸 Servo ON）
+            servo_register = self.config.getint('SERVO_CONTROL', 'SERVO_REGISTER')
+            servo_on_value = self.config.getint('SERVO_CONTROL', 'SERVO_ON_VALUE')
+            
+            # 寫入配置值啟動伺服
+            self.statusBar().showMessage(f"正在啟動伺服系統 (D{servo_register} = {servo_on_value})...")
+            result = self.modbus.write_do(servo_register, servo_on_value)
+            
+            if result:
+                self.is_running = True
+                self.run_status_label.setText("運行中")
+                self.run_status_label.setStyleSheet("color: green;")
+                self.start_button.setEnabled(False)
+                self.stop_button.setEnabled(True)
+                # 啟動後啟用模式選擇
+                self.mode_combo.setEnabled(True)
+                # 根據當前模式設置其他控件狀態
+                if self.is_auto_mode:
+                    # 自動模式：啟用塗膠閥和路徑選擇
+                    self.valve_type_combo.setEnabled(True)
+                    self.path_combo.setEnabled(True)
+                    if self.path_combo.currentIndex() >= 0:
+                        self.auto_run_button.setEnabled(True)
+                    # 禁用手動IO控制
+                    self.valve_on_button.setEnabled(False)
+                    self.valve_off_button.setEnabled(False)
+                else:
+                    # 手動模式：啟用手動IO控制
+                    self.valve_on_button.setEnabled(True)
+                    self.valve_off_button.setEnabled(True)
+                    self.valve_2_on_button.setEnabled(True)
+                    self.valve_2_off_button.setEnabled(True)
+                    self.cylinder_1_extend_button.setEnabled(True)
+                    self.cylinder_1_retract_button.setEnabled(True)
+                    self.cylinder_2_extend_button.setEnabled(True)
+                    self.cylinder_2_retract_button.setEnabled(True)
+                    # 禁用自動相關控制
+                    self.valve_type_combo.setEnabled(False)
+                    self.path_combo.setEnabled(False)
+                    self.auto_run_button.setEnabled(False)
+                self.statusBar().showMessage("伺服系統已啟動 - 可以開始控制")
             else:
-                # 手動模式：啟用手動IO控制
-                self.valve_on_button.setEnabled(True)
-                self.valve_off_button.setEnabled(True)
-                self.valve_2_on_button.setEnabled(True)
-                self.valve_2_off_button.setEnabled(True)
-                self.cylinder_1_extend_button.setEnabled(True)
-                self.cylinder_1_retract_button.setEnabled(True)
-                self.cylinder_2_extend_button.setEnabled(True)
-                self.cylinder_2_retract_button.setEnabled(True)
-                # 禁用自動相關控制
-                self.valve_type_combo.setEnabled(False)
-                self.path_combo.setEnabled(False)
-                self.auto_run_button.setEnabled(False)
-            self.statusBar().showMessage("機械臂已啟動 - 請選擇運行模式")
-        else:
-            QMessageBox.warning(self, "控制失敗", "無法啟動機械臂")
+                self.statusBar().showMessage("啟動伺服系統失敗")
+                QMessageBox.critical(self, "錯誤", "無法啟動伺服系統，請檢查連接")
+        except Exception as e:
+            self.statusBar().showMessage(f"啟動失敗: {str(e)}")
+            QMessageBox.critical(self, "錯誤", f"啟動伺服系統時出錯:\n{str(e)}")
     
     def stop_robot(self):
-        """停止機械臂"""
-        if self.modbus.write_coil(0, False):  # 寫入停止信號到線圈 0
+        """停止機械臂（通過配置的伺服寄存器關閉伺服）"""
+        if not self.modbus or not self.modbus.is_connected:
+            # 如果未連接，至少允許 UI 狀態復位
+            self.is_running = False
+            self.run_status_label.setText("已停止")
+            self.run_status_label.setStyleSheet("color: red;")
+            self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+            self.mode_combo.setEnabled(False)
+            self.disable_all_controls()
+            return
+        
+        try:
+            # 讀取伺服寄存器配置（全軸 Servo OFF）
+            servo_register = self.config.getint('SERVO_CONTROL', 'SERVO_REGISTER')
+            servo_off_value = self.config.getint('SERVO_CONTROL', 'SERVO_OFF_VALUE')
+            
+            # 寫入配置值關閉伺服
+            self.statusBar().showMessage(f"正在停止伺服系統 (D{servo_register} = {servo_off_value})...")
+            result = self.modbus.write_do(servo_register, servo_off_value)
+            
+            # 無論結果如何，都更新 UI 狀態
             self.is_running = False
             self.run_status_label.setText("已停止")
             self.run_status_label.setStyleSheet("color: red;")
@@ -819,27 +963,42 @@ class RobotControlUI(QMainWindow):
             self.stop_button.setEnabled(False)
             # 停止後禁用模式選擇和所有相關控制項
             self.mode_combo.setEnabled(False)
-            self.valve_type_combo.setEnabled(False)
-            self.path_combo.setEnabled(False)
-            self.auto_run_button.setEnabled(False)
-            self.valve_on_button.setEnabled(False)
-            self.valve_off_button.setEnabled(False)
-            self.valve_2_on_button.setEnabled(False)
-            self.valve_2_off_button.setEnabled(False)
-            self.cylinder_1_extend_button.setEnabled(False)
-            self.cylinder_1_retract_button.setEnabled(False)
-            self.cylinder_2_extend_button.setEnabled(False)
-            self.cylinder_2_retract_button.setEnabled(False)
-            self.statusBar().showMessage("機械臂已停止 - 請重新啟動手臂")
-        else:
-            QMessageBox.warning(self, "控制失敗", "無法停止機械臂")
+            self.disable_all_controls()
+            
+            if result:
+                self.statusBar().showMessage("伺服系統已停止")
+            else:
+                self.statusBar().showMessage("停止伺服系統失敗（已更新 UI 狀態）")
+        except Exception as e:
+            self.statusBar().showMessage(f"停止失敗: {str(e)}")
+            # 發生錯誤時也復位 UI
+            self.is_running = False
+            self.run_status_label.setText("已停止")
+            self.run_status_label.setStyleSheet("color: red;")
+            self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+            self.mode_combo.setEnabled(False)
+            self.disable_all_controls()
+    
+    def disable_all_controls(self):
+        """禁用所有控制項"""
+        self.valve_type_combo.setEnabled(False)
+        self.path_combo.setEnabled(False)
+        self.auto_run_button.setEnabled(False)
+        self.valve_on_button.setEnabled(False)
+        self.valve_off_button.setEnabled(False)
+        self.valve_2_on_button.setEnabled(False)
+        self.valve_2_off_button.setEnabled(False)
+        self.cylinder_1_extend_button.setEnabled(False)
+        self.cylinder_1_retract_button.setEnabled(False)
+        self.cylinder_2_extend_button.setEnabled(False)
+        self.cylinder_2_retract_button.setEnabled(False)
     
     def change_mode(self, mode):
         """改變運行模式"""
         if mode == "自動":
             self.is_auto_mode = True
-            # 寫入自動模式信號到線圈 1
-            self.modbus.write_coil(1, True)
+            # UI 模式切換（不發送 Modbus 命令）
             self.current_mode_label.setText("自動")
             self.current_mode_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("切換到自動模式")
@@ -1044,10 +1203,9 @@ class RobotControlUI(QMainWindow):
     
     def valve_on(self):
         """打開膠閥（塗膠）"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'VALVE_ON_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'VALVE_ON_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'VALVE_ON_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.glue_valve_on = True
             self.valve_status_label.setText("狀態: 塗膠 (ON)")
             self.valve_status_label.setStyleSheet("color: green;")
@@ -1057,10 +1215,10 @@ class RobotControlUI(QMainWindow):
     
     def valve_off(self):
         """關閉膠閥（停膠）"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'VALVE_OFF_COIL'),
-            True
-        ):
+        # 對於圍壩膠：寫入 0x0000 關閉
+        register = self.config.getint('IO_CONTROL', 'VALVE_OFF_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'VALVE_OFF_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.glue_valve_on = False
             self.valve_status_label.setText("狀態: 停膠 (OFF)")
             self.valve_status_label.setStyleSheet("color: red;")
@@ -1070,10 +1228,9 @@ class RobotControlUI(QMainWindow):
     
     def valve_2_on(self):
         """打開熱固化三防滴膠閥"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'VALVE_2_ON_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'VALVE_2_ON_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'VALVE_2_ON_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.valve_2_status_label.setText("狀態: 開啟 (ON)")
             self.valve_2_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("熱固化三防滴膠閥已開啟")
@@ -1082,10 +1239,9 @@ class RobotControlUI(QMainWindow):
     
     def valve_2_off(self):
         """關閉熱固化三防滴膠閥"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'VALVE_2_OFF_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'VALVE_2_OFF_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'VALVE_2_OFF_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.valve_2_status_label.setText("狀態: 關閉 (OFF)")
             self.valve_2_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("熱固化三防滴膠閥已關閉")
@@ -1094,10 +1250,9 @@ class RobotControlUI(QMainWindow):
     
     def cylinder_1_extend(self):
         """圍壩膠氣缸伸出"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'CYLINDER_1_EXTEND_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'CYLINDER_1_EXTEND_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'CYLINDER_1_EXTEND_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.cylinder_1_status_label.setText("狀態: 伸出")
             self.cylinder_1_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("圍壩膠氣缸已伸出")
@@ -1106,10 +1261,9 @@ class RobotControlUI(QMainWindow):
     
     def cylinder_1_retract(self):
         """圍壩膠氣缸收回"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'CYLINDER_1_RETRACT_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'CYLINDER_1_RETRACT_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'CYLINDER_1_RETRACT_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.cylinder_1_status_label.setText("狀態: 收回")
             self.cylinder_1_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("圍壩膠氣缸已收回")
@@ -1118,10 +1272,9 @@ class RobotControlUI(QMainWindow):
     
     def cylinder_2_extend(self):
         """熱固化三防膠氣缸伸出"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'CYLINDER_2_EXTEND_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'CYLINDER_2_EXTEND_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'CYLINDER_2_EXTEND_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.cylinder_2_status_label.setText("狀態: 伸出")
             self.cylinder_2_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("熱固化三防膠氣缸已伸出")
@@ -1130,10 +1283,9 @@ class RobotControlUI(QMainWindow):
     
     def cylinder_2_retract(self):
         """熱固化三防膠氣缸收回"""
-        if self.modbus.write_coil(
-            self.config.getint('IO_CONTROL', 'CYLINDER_2_RETRACT_COIL'),
-            True
-        ):
+        register = self.config.getint('IO_CONTROL', 'CYLINDER_2_RETRACT_REGISTER')
+        value = int(self.config.get('IO_CONTROL', 'CYLINDER_2_RETRACT_VALUE'), 16)
+        if self.modbus.write_do(register, value):
             self.cylinder_2_status_label.setText("狀態: 收回")
             self.cylinder_2_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("熱固化三防膠氣缸已收回")
