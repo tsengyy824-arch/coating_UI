@@ -4,7 +4,12 @@
 """
 
 import sys
+import os
 import configparser
+
+# 添加專案根目錄到 Python 路徑，讓 ui.py 可以直接執行
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QComboBox, QGroupBox,
@@ -34,7 +39,8 @@ class RobotControlUI(QMainWindow):
             host=self.config.get('MODBUS', 'HOST'),
             port=self.config.getint('MODBUS', 'PORT'),
             timeout=self.config.getint('MODBUS', 'TIMEOUT'),
-            retries=self.config.getint('MODBUS', 'RETRIES')
+            retries=self.config.getint('MODBUS', 'RETRIES'),
+            unit_id=self.config.getint('MODBUS', 'UNIT_ID', fallback=2)
         )
         
         # 初始化 DRA 路徑管理器
@@ -879,19 +885,15 @@ class RobotControlUI(QMainWindow):
             self.statusBar().showMessage(error_msg)
     
     def start_robot(self):
-        """啟動機械臂（通過配置的伺服寄存器啟用伺服）"""
+        """啟動機械臂（通過已測試的伺服控制方法啟用全軸伺服）"""
         if not self.modbus or not self.modbus.is_connected:
             QMessageBox.warning(self, "警告", "請先連接到 DRA 控制器")
             return
         
         try:
-            # 讀取伺服寄存器配置（全軸 Servo ON）
-            servo_register = self.config.getint('SERVO_CONTROL', 'SERVO_REGISTER')
-            servo_on_value = self.config.getint('SERVO_CONTROL', 'SERVO_ON_VALUE')
-            
-            # 寫入配置值啟動伺服
-            self.statusBar().showMessage(f"正在啟動伺服系統 (D{servo_register} = {servo_on_value})...")
-            result = self.modbus.write_do(servo_register, servo_on_value)
+            # 使用經過測試的 servo_on 方法啟動伺服
+            self.statusBar().showMessage("正在啟動伺服系統...")
+            result = self.modbus.servo_on()
             
             if result:
                 self.is_running = True
@@ -927,14 +929,15 @@ class RobotControlUI(QMainWindow):
                     self.auto_run_button.setEnabled(False)
                 self.statusBar().showMessage("伺服系統已啟動 - 可以開始控制")
             else:
+                error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
                 self.statusBar().showMessage("啟動伺服系統失敗")
-                QMessageBox.critical(self, "錯誤", "無法啟動伺服系統，請檢查連接")
+                QMessageBox.critical(self, "錯誤", f"無法啟動伺服系統，請檢查連接{error_detail}")
         except Exception as e:
             self.statusBar().showMessage(f"啟動失敗: {str(e)}")
             QMessageBox.critical(self, "錯誤", f"啟動伺服系統時出錯:\n{str(e)}")
     
     def stop_robot(self):
-        """停止機械臂（通過配置的伺服寄存器關閉伺服）"""
+        """停止機械臂（通過已測試的伺服控制方法關閉全軸伺服）"""
         if not self.modbus or not self.modbus.is_connected:
             # 如果未連接，至少允許 UI 狀態復位
             self.is_running = False
@@ -947,13 +950,9 @@ class RobotControlUI(QMainWindow):
             return
         
         try:
-            # 讀取伺服寄存器配置（全軸 Servo OFF）
-            servo_register = self.config.getint('SERVO_CONTROL', 'SERVO_REGISTER')
-            servo_off_value = self.config.getint('SERVO_CONTROL', 'SERVO_OFF_VALUE')
-            
-            # 寫入配置值關閉伺服
-            self.statusBar().showMessage(f"正在停止伺服系統 (D{servo_register} = {servo_off_value})...")
-            result = self.modbus.write_do(servo_register, servo_off_value)
+            # 使用經過測試的 servo_off 方法停止伺服
+            self.statusBar().showMessage("正在停止伺服系統...")
+            result = self.modbus.servo_off()
             
             # 無論結果如何，都更新 UI 狀態
             self.is_running = False
@@ -968,7 +967,8 @@ class RobotControlUI(QMainWindow):
             if result:
                 self.statusBar().showMessage("伺服系統已停止")
             else:
-                self.statusBar().showMessage("停止伺服系統失敗（已更新 UI 狀態）")
+                error_detail = f" ({self.modbus.last_error})" if self.modbus.last_error else ""
+                self.statusBar().showMessage(f"停止伺服系統失敗{error_detail}（已更新 UI 狀態）")
         except Exception as e:
             self.statusBar().showMessage(f"停止失敗: {str(e)}")
             # 發生錯誤時也復位 UI
@@ -1211,7 +1211,9 @@ class RobotControlUI(QMainWindow):
             self.valve_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("膠閥已打開 - 塗膠中")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法打開膠閥")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"膠閥打開失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法打開膠閥{error_detail}")
     
     def valve_off(self):
         """關閉膠閥（停膠）"""
@@ -1224,7 +1226,9 @@ class RobotControlUI(QMainWindow):
             self.valve_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("膠閥已關閉 - 停止塗膠")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法關閉膠閥")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"膠閥關閉失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法關閉膠閥{error_detail}")
     
     def valve_2_on(self):
         """打開熱固化三防滴膠閥"""
@@ -1235,7 +1239,9 @@ class RobotControlUI(QMainWindow):
             self.valve_2_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("熱固化三防滴膠閥已開啟")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法打開熱固化三防滴膠閥")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"熱固化三防滴膠閥開啟失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法打開熱固化三防滴膠閥{error_detail}")
     
     def valve_2_off(self):
         """關閉熱固化三防滴膠閥"""
@@ -1246,7 +1252,9 @@ class RobotControlUI(QMainWindow):
             self.valve_2_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("熱固化三防滴膠閥已關閉")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法關閉熱固化三防滴膠閥")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"熱固化三防滴膠閥關閉失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法關閉熱固化三防滴膠閥{error_detail}")
     
     def cylinder_1_extend(self):
         """圍壩膠氣缸伸出"""
@@ -1257,7 +1265,9 @@ class RobotControlUI(QMainWindow):
             self.cylinder_1_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("圍壩膠氣缸已伸出")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法伸出圍壩膠氣缸")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"圍壩膠氣缸伸出失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法伸出圍壩膠氣缸{error_detail}")
     
     def cylinder_1_retract(self):
         """圍壩膠氣缸收回"""
@@ -1268,7 +1278,9 @@ class RobotControlUI(QMainWindow):
             self.cylinder_1_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("圍壩膠氣缸已收回")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法收回圍壩膠氣缸")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"圍壩膠氣缸收回失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法收回圍壩膠氣缸{error_detail}")
     
     def cylinder_2_extend(self):
         """熱固化三防膠氣缸伸出"""
@@ -1279,7 +1291,9 @@ class RobotControlUI(QMainWindow):
             self.cylinder_2_status_label.setStyleSheet("color: green;")
             self.statusBar().showMessage("熱固化三防膠氣缸已伸出")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法伸出熱固化三防膠氣缸")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"熱固化三防膠氣缸伸出失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法伸出熱固化三防膠氣缸{error_detail}")
     
     def cylinder_2_retract(self):
         """熱固化三防膠氣缸收回"""
@@ -1290,7 +1304,9 @@ class RobotControlUI(QMainWindow):
             self.cylinder_2_status_label.setStyleSheet("color: red;")
             self.statusBar().showMessage("熱固化三防膠氣缸已收回")
         else:
-            QMessageBox.warning(self, "控制失敗", "無法收回熱固化三防膠氣缸")
+            error_detail = f"\n詳情: {self.modbus.last_error}" if self.modbus.last_error else ""
+            self.statusBar().showMessage(f"熱固化三防膠氣缸收回失敗{error_detail}")
+            QMessageBox.warning(self, "控制失敗", f"無法收回熱固化三防膠氣缸{error_detail}")
     
     def update_status(self):
         """定時更新系統狀態"""
